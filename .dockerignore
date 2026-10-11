@@ -1,0 +1,8 @@
+**
+!Dockerfile
+!scripts/
+!scripts/**
+!config/
+!config/**
+!installers/
+!installers/yunshu.deb

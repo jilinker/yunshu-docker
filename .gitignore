@@ -1,0 +1,10 @@
+.env
+installers/*.deb
+data/
+*.log
+docs/yunshu-*.jpg
+docs/yunshu-*.png
+.idea/
+__pycache__/
+*.pyc
+.DS_Store

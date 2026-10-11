@@ -1,0 +1,33 @@
+services:
+  yunshu:
+    image: ${YUNSHU_IMAGE:-crpi-bqdmpalw8hu6it5q.cn-shenzhen.personal.cr.aliyuncs.com/jaelinker_public/yunshu-docker:2.3.10.47}
+    platform: linux/arm64
+    build:
+      context: .
+      args:
+        YUNSHU_DEB_SHA256: ${YUNSHU_DEB_SHA256:-2a1318ae2b4fa519645e864eb5aca608d158eff90b38b9040f02ea4f8e5a3025}
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    cap_add:
+      - NET_ADMIN
+    shm_size: 256m
+    ports:
+      - "${BIND_ADDRESS:-127.0.0.1}:${SOCKS_PORT:-7171}:7171"
+      - "${BIND_ADDRESS:-127.0.0.1}:${WEB_PORT:-6080}:6080"
+      - "${BIND_ADDRESS:-127.0.0.1}:${VNC_PORT:-5901}:5901"
+    environment:
+      VNC_SIZE: ${VNC_SIZE:-1280x800}
+    volumes:
+      - yunshu-home:/home/yunshu
+      - yunshu-state:/var/lib/yunshu
+    restart: unless-stopped
+    stop_grace_period: 30s
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+volumes:
+  yunshu-home:
+  yunshu-state:
