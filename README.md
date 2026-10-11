@@ -56,7 +56,48 @@ docker exec yunshu cat /home/yunshu/.vnc/initial-password
 
 打开 [浏览器 GUI](http://127.0.0.1:6080)，输入 VNC 密码连接桌面，再在云枢客户端中登录账号并点击“立即接入”。客户端显示“成功连接内网”后，再测试企业目标。
 
-VNC 密码只用于连接桌面，与云枢账号密码无关。首次密码保存在 HOME 卷中，重启后保持不变。也可以在 `docker run` 中传入 `VNC_PASSWORD`，或挂载密码文件并设置 `VNC_PASSWORD_FILE`；指定密码时不会保留 `initial-password` 文件。传统 VNC 认证只使用密码的前 8 个字符。
+VNC 密码只用于连接桌面，与云枢账号密码无关。未指定时自动生成，首次密码保存在 HOME 卷中，重启后保持不变。传统 VNC 认证只使用密码的**前 8 个字符**。
+
+#### 指定 VNC 密码
+
+**Docker run**：在上面的启动命令中加入以下参数，并将 `yourpass` 替换为自己的密码：
+
+```sh
+-e VNC_PASSWORD='yourpass'
+```
+
+**Docker Compose**：在 `compose.yaml` 的 `environment` 中显式添加密码变量：
+
+```yaml
+services:
+  yunshu:
+    environment:
+      VNC_SIZE: ${VNC_SIZE:-1280x800}
+      VNC_PASSWORD: ${VNC_PASSWORD:-}
+```
+
+再在 `.env` 中设置：
+
+```dotenv
+VNC_PASSWORD=yourpass
+```
+
+仅修改 `.env` 不会自动将新变量传入容器，需要同时添加上述 `environment` 配置。修改后重新创建容器：
+
+```sh
+docker compose up -d --no-build yunshu
+```
+
+该命令保留原有状态卷。现有容器的环境变量不能通过 `docker restart` 更新；使用 `docker run` 时，需要带新参数重新创建容器并复用原卷。
+
+**密码文件**：也可以将密码保存到宿主机文件，在 `docker run` 中加入只读挂载和文件路径参数：
+
+```sh
+--mount type=bind,src=/absolute/path/vnc-password,dst=/run/secrets/vnc-password,readonly \
+  -e VNC_PASSWORD_FILE=/run/secrets/vnc-password
+```
+
+将 `/absolute/path/vnc-password` 替换为实际密码文件的绝对路径。`VNC_PASSWORD_FILE` 优先于 `VNC_PASSWORD`；指定密码后，VNC 使用指定值，不再保留 `initial-password` 文件。
 
 ### 4. 验证代理
 
@@ -83,7 +124,7 @@ docker compose pull
 docker compose up -d --no-build
 ```
 
-读取 VNC 密码：
+未指定 VNC 密码时，读取首次生成的密码：
 
 ```sh
 docker compose exec -T yunshu cat /home/yunshu/.vnc/initial-password
