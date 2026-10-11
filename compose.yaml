@@ -17,6 +17,7 @@ services:
       - "${BIND_ADDRESS:-127.0.0.1}:${VNC_PORT:-5901}:5901"
     environment:
       VNC_SIZE: ${VNC_SIZE:-1280x800}
+      VNC_PASSWORD: ${VNC_PASSWORD:-}
     volumes:
       - yunshu-home:/home/yunshu
       - yunshu-state:/var/lib/yunshu
